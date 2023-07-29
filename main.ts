@@ -61,23 +61,25 @@ for await (const item of itemList) {
 
   // URLからOGPの取得
   const getOgp = async (url: string) => {
-    const res = await fetch(url, { headers: { 'user-agent': 'Twitterbot' } });
+    const res = await fetch(url, {
+      headers: { 'user-agent': 'Twitterbot' },
+    });
     const html = await res.text();
 
     const { result } = await ogs({ html });
     console.log(result);
 
-    if (!result.ogImage || !result.ogTitle) {
+    const ogImage = result.ogImage?.at(0);
+    if (!ogImage.url || !ogImage.type) {
       return {};
     }
 
-    const ogImage = result.ogImage?.at(0);
-    const response = await fetch(ogImage?.url || '');
+    const response = await fetch(new URL(ogImage.url, link).href);
     const buffer = await response.arrayBuffer();
 
     // TODO: 画像を1MB以下になるまでリサイズしたい
     let resizedImage, mimeType;
-    if (ogImage?.type === 'gif') {
+    if (ogImage.type === 'gif') {
       mimeType = 'image/gif';
       const gif = await GIF.decode(buffer);
       resizedImage = gif.encode();
@@ -115,7 +117,7 @@ for await (const item of itemList) {
     facets: rt.facets,
   };
 
-  if (og.image) {
+  if (og.image instanceof Uint8Array && typeof og.type === 'string') {
     // 画像をアップロード
     const uploadedImage = await agent.uploadBlob(og.image, {
       encoding: og.type,
