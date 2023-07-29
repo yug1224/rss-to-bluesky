@@ -73,7 +73,7 @@ for await (const item of itemList) {
     const ogImage = result.ogImage?.at(0);
 
     // OGPに画像がない場合は空オブジェクトを返す
-    if (!ogImage?.url || !ogImage?.type) {
+    if (!ogImage?.url) {
       return {};
     }
 
