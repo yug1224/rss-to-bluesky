@@ -54,6 +54,7 @@ jobs:
           TZ: 'Asia/Tokyo'
       - name: Save Last Execution Time
         uses: actions/cache/save@v3
+        if: always()
         with:
           path: |
             .timestamp
