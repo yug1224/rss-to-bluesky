@@ -60,7 +60,9 @@ for await (const item of itemList) {
   const [url] = text.match(pattern) || [''];
 
   // URLからOGPの取得
-  const getOgp = async (url: string) => {
+  const getOgp = async (
+    url: string
+  ): Promise<{ type?: string; image?: Uint8Array }> => {
     const res = await fetch(url, {
       headers: { 'user-agent': 'Twitterbot' },
     });
@@ -68,39 +70,52 @@ for await (const item of itemList) {
 
     const { result } = await ogs({ html });
     console.log(result);
-
     const ogImage = result.ogImage?.at(0);
-    if (!ogImage.url || !ogImage.type) {
+
+    // OGPに画像がない場合は空オブジェクトを返す
+    if (!ogImage?.url || !ogImage?.type) {
       return {};
     }
 
     const response = await fetch(new URL(ogImage.url, link).href);
-    const buffer = await response.arrayBuffer();
 
-    // TODO: 画像を1MB以下になるまでリサイズしたい
-    let resizedImage, mimeType;
-    if (ogImage.type === 'gif') {
-      mimeType = 'image/gif';
-      const gif = await GIF.decode(buffer);
-      resizedImage = gif.encode();
-    } else {
-      mimeType = 'image/jpeg';
-      const image = await Image.decode(buffer);
-      resizedImage =
-        image.width < 1024 && image.height < 1024
-          ? await image.encodeJPEG()
-          : await image
-              .resize(
-                image.width >= image.height ? 1024 : Image.RESIZE_AUTO,
-                image.width < image.height ? 1024 : Image.RESIZE_AUTO
-              )
-              .encodeJPEG();
+    // 画像が取得できなかった場合は空オブジェクトを返す
+    if (
+      !response.ok ||
+      !response.headers.get('content-type')?.includes('image')
+    ) {
+      return {};
     }
 
-    return {
-      type: mimeType,
-      image: resizedImage,
-    };
+    const buffer = await response.arrayBuffer();
+
+    let type, resizedImage;
+    try {
+      // TODO: 画像を1MB以下になるまでリサイズしたい
+      if (ogImage.type === 'gif') {
+        type = 'image/gif';
+        const gif = await GIF.decode(buffer);
+        resizedImage = await gif.encode();
+      } else {
+        type = 'image/jpeg';
+        const image = await Image.decode(buffer);
+        resizedImage =
+          image.width < 1024 && image.height < 1024
+            ? await image.encodeJPEG()
+            : await image
+                .resize(
+                  image.width >= image.height ? 1024 : Image.RESIZE_AUTO,
+                  image.width < image.height ? 1024 : Image.RESIZE_AUTO
+                )
+                .encodeJPEG();
+      }
+    } catch (e) {
+      // 画像のリサイズに失敗した場合は空オブジェクトを返す
+      console.error(e);
+      return {};
+    }
+
+    return { type, image: resizedImage };
   };
   const og = await getOgp(url);
 
@@ -111,7 +126,8 @@ for await (const item of itemList) {
     continue;
   }
 
-  const postObj = {
+  const postObj: Partial<AtprotoAPI.AppBskyFeedPost.Record> &
+    Omit<AtprotoAPI.AppBskyFeedPost.Record, 'createdAt'> = {
     $type: 'app.bsky.feed.post',
     text: rt.text,
     facets: rt.facets,
