@@ -19,7 +19,8 @@ const getItemList = async () => {
       new Date(lastExecutionTime.trim()) < new Date(item.published)
     );
   });
-  return foundList;
+  // foundListの5件目までを返す
+  return foundList.slice(0, 5);
 };
 const itemList = await getItemList();
 console.log(itemList);
