@@ -23,7 +23,7 @@ const getItemList = async () => {
   return foundList.slice(0, 5);
 };
 const itemList = await getItemList();
-console.log(itemList);
+console.log(JSON.stringify(itemList, null, 2));
 
 // 対象がなかったら終了
 if (!itemList.length) {
@@ -66,11 +66,16 @@ for await (const item of itemList) {
   ): Promise<{ type?: string; image?: Uint8Array }> => {
     const res = await fetch(url, {
       headers: { 'user-agent': 'Twitterbot' },
-    });
-    const html = await res.text();
+    }).catch(() => {});
 
+    // OGP取得のリクエストに失敗した場合は空オブジェクトを返す
+    if (!res) {
+      return {};
+    }
+
+    const html = await res.text();
     const { result } = await ogs({ html });
-    console.log(result);
+    console.log(JSON.stringify(result, null, 2));
     const ogImage = result.ogImage?.at(0);
 
     // OGPに画像がない場合は空オブジェクトを返す
@@ -110,9 +115,8 @@ for await (const item of itemList) {
                 )
                 .encodeJPEG();
       }
-    } catch (e) {
+    } catch {
       // 画像のリサイズに失敗した場合は空オブジェクトを返す
-      console.error(e);
       return {};
     }
 
@@ -158,7 +162,7 @@ for await (const item of itemList) {
       },
     };
   }
-  console.log(postObj);
+  console.log(JSON.stringify(postObj, null, 2));
   const result = await agent.post(postObj);
-  console.log(result);
+  console.log(JSON.stringify(result, null, 2));
 }
