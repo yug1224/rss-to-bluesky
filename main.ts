@@ -56,10 +56,6 @@ for await (const item of itemList) {
   // 投稿予定のテキストを作成
   const text = `${title}\n${link}`;
 
-  const pattern =
-    /https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#\u3000-\u30FE\u4E00-\u9FA0\uFF01-\uFFE3]+/g;
-  const [url] = text.match(pattern) || [''];
-
   // URLからOGPの取得
   const getOgp = async (
     url: string
@@ -120,7 +116,7 @@ for await (const item of itemList) {
 
     return { type, image: resizedImage };
   };
-  const og = await getOgp(url);
+  const og = await getOgp(link);
 
   const rt = new RichText({ text });
   await rt.detectFacets(agent);
@@ -146,7 +142,7 @@ for await (const item of itemList) {
     postObj.embed = {
       $type: 'app.bsky.embed.external',
       external: {
-        uri: url,
+        uri: link,
         thumb: {
           $type: 'blob',
           ref: {
