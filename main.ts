@@ -84,12 +84,10 @@ for await (const item of itemList) {
     }
 
     const response = await fetch(new URL(ogImage.url, link).href);
+    const contentType = response.headers.get('content-type');
 
     // 画像が取得できなかった場合は空オブジェクトを返す
-    if (
-      !response.ok ||
-      !response.headers.get('content-type')?.includes('image')
-    ) {
+    if (!response.ok || !contentType?.includes('image')) {
       return {};
     }
 
@@ -98,7 +96,7 @@ for await (const item of itemList) {
     let type, resizedImage;
     try {
       // TODO: 画像を1MB以下になるまでリサイズしたい
-      if (ogImage.type === 'gif') {
+      if (contentType.includes('gif')) {
         type = 'image/gif';
         const gif = await GIF.decode(buffer);
         resizedImage = await gif.encode();
