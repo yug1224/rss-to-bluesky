@@ -54,7 +54,24 @@ for await (const item of itemList) {
   const link = item.links[0].href || '';
 
   // 投稿予定のテキストを作成
-  const text = `${title}\n${link}`;
+  let text = `${title}\n${link}`;
+  const segmenter = new Intl.Segmenter();
+  const titleSegments = Array.from(segmenter.segment(title));
+  const linkSegments = Array.from(segmenter.segment(link));
+  const textSegments = Array.from(segmenter.segment(text));
+
+  const max = 300;
+  if (textSegments.length > max) {
+    console.log('text too long');
+    // 300文字を超える場合は、300文字になるように切り詰める
+    const ellipsis = '...\n';
+    const cnt = max - ellipsis.length - linkSegments.length;
+    const shortenedText = titleSegments.reduce((prev, curr, i) => {
+      if (i >= cnt) return prev;
+      return `${prev}${curr.segment}`;
+    }, '');
+    text = `${shortenedText}${ellipsis}${link}`;
+  }
 
   // URLからOGPの取得
   const getOgp = async (
@@ -124,10 +141,6 @@ for await (const item of itemList) {
 
   const rt = new RichText({ text });
   await rt.detectFacets(agent);
-  if (rt.text.length > 300) {
-    // 300文字以上は投稿しない
-    continue;
-  }
 
   const postObj: Partial<AtprotoAPI.AppBskyFeedPost.Record> &
     Omit<AtprotoAPI.AppBskyFeedPost.Record, 'createdAt'> = {
