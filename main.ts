@@ -66,6 +66,7 @@ for await (const item of itemList) {
 
     // OGP取得のリクエストに失敗した場合は空オブジェクトを返す
     if (!res) {
+      console.log('failed to get ogp');
       return {};
     }
 
@@ -76,6 +77,7 @@ for await (const item of itemList) {
 
     // OGPに画像がない場合は空オブジェクトを返す
     if (!ogImage?.url) {
+      console.log('ogp image not found');
       return {};
     }
 
@@ -84,6 +86,7 @@ for await (const item of itemList) {
 
     // 画像が取得できなかった場合は空オブジェクトを返す
     if (!response.ok || !contentType?.includes('image')) {
+      console.log('failed to get image');
       return {};
     }
 
@@ -111,6 +114,7 @@ for await (const item of itemList) {
       }
     } catch {
       // 画像のリサイズに失敗した場合は空オブジェクトを返す
+      console.log('failed to resize image');
       return {};
     }
 
