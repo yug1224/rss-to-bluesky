@@ -41,7 +41,7 @@ export default async (
     // TODO: 画像を1MB以下になるまでリサイズしたい
     if (contentType.includes('gif')) {
       type = 'image/gif';
-      const gif = await GIF.decode(buffer);
+      const gif = await GIF.decode(buffer, true);
       resizedImage = await gif.encode();
     } else {
       type = 'image/jpeg';
