@@ -3,6 +3,9 @@ import { Image, GIF } from 'https://deno.land/x/imagescript@1.2.15/mod.ts';
 import { parseFeed } from 'https://deno.land/x/rss@0.6.0/mod.ts';
 import AtprotoAPI from 'npm:@atproto/api';
 import ogs from 'npm:open-graph-scraper';
+import defaultsGraphemer from 'npm:graphemer';
+const Graphemer = defaultsGraphemer.default;
+const splitter = new Graphemer();
 
 const lastExecutionTime = await Deno.readTextFile('.timestamp');
 console.log(lastExecutionTime.trim());
@@ -55,22 +58,18 @@ for await (const item of itemList) {
 
   // 投稿予定のテキストを作成
   let text = `${title}\n${link}`;
-  const segmenter = new Intl.Segmenter();
-  const titleSegments = Array.from(segmenter.segment(title));
-  const linkSegments = Array.from(segmenter.segment(link));
-  const textSegments = Array.from(segmenter.segment(text));
 
   const max = 300;
-  if (textSegments.length > max) {
+  if (splitter.countGraphemes(text) > max) {
     console.log('text too long');
     // 300文字を超える場合は、300文字になるように切り詰める
     const ellipsis = '...\n';
-    const cnt = max - ellipsis.length - linkSegments.length;
-    const shortenedText = titleSegments.reduce((prev, curr, i) => {
-      if (i >= cnt) return prev;
-      return `${prev}${curr.segment}`;
-    }, '');
-    text = `${shortenedText}${ellipsis}${link}`;
+    const cnt = max - ellipsis.length - splitter.countGraphemes(link);
+    const shortenedTitle = splitter
+      .splitGraphemes(title)
+      .slice(0, cnt)
+      .join('');
+    text = `${shortenedTitle}${ellipsis}${link}`;
   }
 
   // URLからOGPの取得
