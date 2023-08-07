@@ -1,7 +1,5 @@
-import AtprotoAPI from 'npm:@atproto/api';
-
-// Blueskyに接続
-const { BskyAgent, RichText } = AtprotoAPI;
+import AtprotoAPI, { RichText } from 'npm:@atproto/api';
+const { BskyAgent } = AtprotoAPI;
 const service = 'https://bsky.social';
 const agent = new BskyAgent({ service });
 const identifier = Deno.env.get('BLUESKY_IDENTIFIER') || '';
@@ -9,23 +7,20 @@ const password = Deno.env.get('BLUESKY_PASSWORD') || '';
 await agent.login({ identifier, password });
 
 export default async ({
-  text,
+  rt,
   title,
   link,
   description,
   mimeType,
   image,
 }: {
-  text: string;
+  rt: RichText;
   title: string;
   link: string;
   description: string;
   mimeType?: string;
   image?: Uint8Array;
 }) => {
-  const rt = new RichText({ text });
-  await rt.detectFacets(agent);
-
   const postObj: Partial<AtprotoAPI.AppBskyFeedPost.Record> &
     Omit<AtprotoAPI.AppBskyFeedPost.Record, 'createdAt'> = {
     $type: 'app.bsky.feed.post',
