@@ -17,10 +17,10 @@ export default async (item: FeedEntry) => {
   const bskyText = await (async () => {
     const max = 300;
     const key = 'LINK';
-    let text = `${title}\n🔗: ${key}`;
+    let text = `${title}\n${key}`;
 
     if (splitter.countGraphemes(text) > max) {
-      const ellipsis = `...\n🔗: `;
+      const ellipsis = `...\n`;
       const cnt = max - splitter.countGraphemes(`${ellipsis}${key}`);
       const shortenedTitle = splitter
         .splitGraphemes(title)
