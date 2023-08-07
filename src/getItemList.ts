@@ -1,3 +1,4 @@
+import { FeedEntry } from 'https://deno.land/x/rss@0.6.0/src/types/mod.ts';
 import { parseFeed } from 'https://deno.land/x/rss@0.6.0/mod.ts';
 
 const lastExecutionTime = await Deno.readTextFile('.timestamp');
@@ -15,7 +16,7 @@ export default async () => {
   const feed = await parseFeed(xml);
 
   // 最終実行時間以降かつdescriptionがある記事を抽出
-  const foundList = feed.entries.reverse().filter((item) => {
+  const foundList = feed.entries.reverse().filter((item: FeedEntry) => {
     return (
       item.published &&
       new Date(lastExecutionTime.trim()) < new Date(item.published)

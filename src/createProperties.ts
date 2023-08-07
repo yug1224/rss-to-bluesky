@@ -4,9 +4,9 @@ const Graphemer = defaultsGraphemer.default;
 const splitter = new Graphemer();
 
 export default (item: FeedEntry) => {
-  const title = item.title?.value || '';
-  const description = item.description?.value || '';
-  const link = item.links[0].href || '';
+  const title: string = item.title?.value || '';
+  const description: string = item.description?.value || '';
+  const link: string = item.links[0].href || '';
   const text = `${title}\n${link}`;
 
   // Bluesky用のテキストを作成

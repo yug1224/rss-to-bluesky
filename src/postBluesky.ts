@@ -8,17 +8,21 @@ const identifier = Deno.env.get('BLUESKY_IDENTIFIER') || '';
 const password = Deno.env.get('BLUESKY_PASSWORD') || '';
 await agent.login({ identifier, password });
 
-export default async (
-  text: string,
-  title: string,
-  link: string,
-  description: string,
-  og: {
-    type?: string | undefined;
-    image?: Uint8Array | undefined;
-    description?: string | undefined;
-  }
-) => {
+export default async ({
+  text,
+  title,
+  link,
+  description,
+  mimeType,
+  image,
+}: {
+  text: string;
+  title: string;
+  link: string;
+  description: string;
+  mimeType?: string;
+  image?: Uint8Array;
+}) => {
   const rt = new RichText({ text });
   await rt.detectFacets(agent);
 
@@ -29,10 +33,10 @@ export default async (
     facets: rt.facets,
   };
 
-  if (og.image instanceof Uint8Array && typeof og.type === 'string') {
+  if (image instanceof Uint8Array && typeof mimeType === 'string') {
     // 画像をアップロード
-    const uploadedImage = await agent.uploadBlob(og.image, {
-      encoding: og.type,
+    const uploadedImage = await agent.uploadBlob(image, {
+      encoding: mimeType,
     });
 
     // 投稿オブジェクトに画像を追加
@@ -49,7 +53,7 @@ export default async (
           size: uploadedImage.data.blob.size,
         },
         title,
-        description: description || og.description || '',
+        description,
       },
     };
   }
