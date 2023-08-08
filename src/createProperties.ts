@@ -16,11 +16,14 @@ export default async (item: FeedEntry) => {
   // Bluesky用のテキストを作成
   const bskyText = await (async () => {
     const max = 300;
-    const key = 'LINK';
+    const { host, pathname } = new URL(link);
+    const ellipsis = `...\n`;
+    const key =
+      splitter.splitGraphemes(`${host}${pathname}`).slice(0, 19).join('') +
+      ellipsis;
     let text = `${title}\n${key}`;
 
     if (splitter.countGraphemes(text) > max) {
-      const ellipsis = `...\n`;
       const cnt = max - splitter.countGraphemes(`${ellipsis}${key}`);
       const shortenedTitle = splitter
         .splitGraphemes(title)
@@ -32,11 +35,9 @@ export default async (item: FeedEntry) => {
     const rt = new RichText({ text });
     await rt.detectFacets(agent);
     rt.facets = [
-      ...(rt.facets || []),
       {
         index: {
-          byteStart:
-            rt.unicodeText.length - new TextEncoder().encode(key).length,
+          byteStart: rt.unicodeText.length - splitter.countGraphemes(key),
           byteEnd: rt.unicodeText.length,
         },
         features: [
@@ -46,6 +47,7 @@ export default async (item: FeedEntry) => {
           },
         ],
       },
+      ...(rt.facets || []),
     ];
     return rt;
   })();
@@ -56,7 +58,7 @@ export default async (item: FeedEntry) => {
     const text = `${title}\n${link}`;
     if (splitter.countGraphemes(title) <= max) return text;
     const ellipsis = '...\n';
-    const cnt = max - ellipsis.length;
+    const cnt = max - splitter.countGraphemes(ellipsis);
     const shortenedTitle = splitter
       .splitGraphemes(title)
       .slice(0, cnt)
