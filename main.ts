@@ -27,7 +27,7 @@ for await (const item of itemList) {
 
   // 投稿記事のプロパティを作成
   const { bskyText, xText, title, link, description } = await createProperties(
-    item
+    item,
   );
 
   // URLからOGPの取得
