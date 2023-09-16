@@ -1,8 +1,8 @@
 name: Technews to SNS
 on:
   schedule:
-    # 5分ごとに実行
-    - cron: '0/5 * * * *'
+    # 10分ごとに実行
+    - cron: '0/10 * * * *'
   workflow_dispatch:
 jobs:
   technews-to-sns:
