@@ -1,5 +1,6 @@
 import 'https://deno.land/std@0.193.0/dotenv/load.ts';
 
+import { delay } from 'https://deno.land/std@0.201.0/async/mod.ts';
 import createProperties from './src/createProperties.ts';
 import getItemList from './src/getItemList.ts';
 import getOgp from './src/getOgp.ts';
@@ -25,8 +26,20 @@ if (!itemList.length) {
   Deno.exit(0);
 }
 
+// 10分後に処理を終了させるためにフラグを立てる
+let isTimeout = false;
+setTimeout(() => {
+  isTimeout = true;
+}, 1000 * 60 * 10);
+
 // 取得した記事リストをループ処理
 for await (const item of itemList) {
+  // isTimeoutがtrueだったら終了
+  if (isTimeout) {
+    console.log('timeout');
+    Deno.exit(0);
+  }
+
   // 最終実行時間を更新
   const timestamp = item.published
     ? new Date(item.published).toISOString()
@@ -36,7 +49,7 @@ for await (const item of itemList) {
   // 投稿記事のプロパティを作成
   const { bskyText, xText, title, link, description } = await createProperties(
     agent,
-    item
+    item,
   );
 
   // URLからOGPの取得
@@ -65,4 +78,7 @@ for await (const item of itemList) {
 
   // IFTTTを使ってXに投稿
   await postWebhook(xText);
+
+  // 15秒待つ
+  await delay(1000 * 15);
 }

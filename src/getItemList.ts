@@ -22,6 +22,5 @@ export default async () => {
       new Date(lastExecutionTime.trim()) < new Date(item.published)
     );
   });
-  // foundListの5件目までを返す
-  return foundList.slice(0, 5);
+  return foundList;
 };
