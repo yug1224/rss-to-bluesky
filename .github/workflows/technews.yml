@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 jobs:
   technews-to-sns:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     # 15分以上かかったらタイムアウト
     timeout-minutes: 15
     steps:
