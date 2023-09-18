@@ -9,13 +9,6 @@ import resizeImage from './src/resizeImage.ts';
 import AtprotoAPI from 'npm:@atproto/api';
 
 try {
-  const { BskyAgent } = AtprotoAPI;
-  const service = 'https://bsky.social';
-  const agent = new BskyAgent({ service });
-  const identifier = Deno.env.get('BLUESKY_IDENTIFIER') || '';
-  const password = Deno.env.get('BLUESKY_PASSWORD') || '';
-  await agent.login({ identifier, password });
-
   // rss feedから記事リストを取得
   const itemList = await getItemList();
   console.log(JSON.stringify(itemList, null, 2));
@@ -25,6 +18,14 @@ try {
     console.log('not found feed item');
     Deno.exit(0);
   }
+
+  // Blueskyにログイン
+  const { BskyAgent } = AtprotoAPI;
+  const service = 'https://bsky.social';
+  const agent = new BskyAgent({ service });
+  const identifier = Deno.env.get('BLUESKY_IDENTIFIER') || '';
+  const password = Deno.env.get('BLUESKY_PASSWORD') || '';
+  await agent.login({ identifier, password });
 
   // 10分後に処理を終了させるためにフラグを立てる
   let isTimeout = false;
@@ -46,15 +47,21 @@ try {
       : new Date().toISOString();
     await Deno.writeTextFile('.timestamp', timestamp);
 
+    // URLからOGPの取得
+    const og = await getOgp(item.links[0].href || '');
+
     // 投稿記事のプロパティを作成
     const { bskyText, xText, title, link, description } =
       await createProperties(
         agent,
-        item,
+        {
+          ...item,
+          title: { value: og.ogTitle || item.title?.value || '' },
+          description: {
+            value: og.ogDescription || item.description?.value || '',
+          },
+        },
       );
-
-    // URLからOGPの取得
-    const og = await getOgp(link);
 
     // 画像のリサイズ
     const { mimeType, resizedImage } = await (async () => {
@@ -72,7 +79,7 @@ try {
       rt: bskyText,
       title,
       link,
-      description: description || og.ogDescription || '',
+      description,
       mimeType,
       image: resizedImage,
     });
@@ -80,9 +87,9 @@ try {
     // IFTTTを使ってXに投稿
     await postWebhook(xText);
 
-    // 30秒待つ
-    console.log('wait 30 seconds');
-    await delay(1000 * 30);
+    // 15秒待つ
+    console.log('wait 15 seconds');
+    await delay(1000 * 15);
   }
 
   // 終了
