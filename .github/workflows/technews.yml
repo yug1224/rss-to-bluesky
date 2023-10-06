@@ -1,8 +1,8 @@
 name: Technews to SNS
 on:
   schedule:
-    # 9時から24時の間で15分ごとに実行
-    - cron: '*/15 0-15 * * *'
+    # 9時から26時の間で15分ごとに実行
+    - cron: '*/15 0-17 * * *'
   workflow_dispatch:
 jobs:
   technews-to-sns:
