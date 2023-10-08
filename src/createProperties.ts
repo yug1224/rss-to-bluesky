@@ -50,16 +50,18 @@ export default async (agent: BskyAgent, item: FeedEntry) => {
 
   // X用のテキストを作成
   const xText = (() => {
-    const max = 118;
+    const max = 110;
     const text = `${title}\n${link}`;
-    if (splitter.countGraphemes(title) <= max) return text;
+    const separator = '\n---';
+    if (splitter.countGraphemes(title) <= max) return `${text}${separator}`;
+
     const ellipsis = '...\n';
-    const cnt = max - splitter.countGraphemes(ellipsis);
+    const cnt = max - splitter.countGraphemes(ellipsis) - splitter.countGraphemes(separator);
     const shortenedTitle = splitter
       .splitGraphemes(title)
       .slice(0, cnt)
       .join('');
-    return `${shortenedTitle}${ellipsis}${link}`;
+    return `${shortenedTitle}${ellipsis}${link}${separator}`;
   })();
 
   return { bskyText, xText, title, link, description };
