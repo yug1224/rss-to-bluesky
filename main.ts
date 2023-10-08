@@ -42,26 +42,23 @@ try {
     }
 
     // 最終実行時間を更新
-    const timestamp = item.published
-      ? new Date(item.published).toISOString()
-      : new Date().toISOString();
+    const timestamp = item.published ? new Date(item.published).toISOString() : new Date().toISOString();
     await Deno.writeTextFile('.timestamp', timestamp);
 
     // URLからOGPの取得
     const og = await getOgp(item.links[0].href || '');
 
     // 投稿記事のプロパティを作成
-    const { bskyText, xText, title, link, description } =
-      await createProperties(
-        agent,
-        {
-          ...item,
-          title: { value: og.ogTitle || item.title?.value || '' },
-          description: {
-            value: og.ogDescription || item.description?.value || '',
-          },
+    const { bskyText, xText, title, link, description } = await createProperties(
+      agent,
+      {
+        ...item,
+        title: { value: og.ogTitle || item.title?.value || '' },
+        description: {
+          value: og.ogDescription || item.description?.value || '',
         },
-      );
+      },
+    );
 
     // 画像のリサイズ
     const { mimeType, resizedImage } = await (async () => {

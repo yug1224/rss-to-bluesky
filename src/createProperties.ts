@@ -16,9 +16,7 @@ export default async (agent: BskyAgent, item: FeedEntry) => {
     const max = 300;
     const { host, pathname } = new URL(link);
     const ellipsis = `...\n`;
-    const key =
-      splitter.splitGraphemes(`${host}${pathname}`).slice(0, 19).join('') +
-      ellipsis;
+    const key = splitter.splitGraphemes(`${host}${pathname}`).slice(0, 19).join('') + ellipsis;
     let text = `${title}\n${key}`;
 
     if (splitter.countGraphemes(text) > max) {
