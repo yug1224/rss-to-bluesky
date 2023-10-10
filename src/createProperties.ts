@@ -7,8 +7,8 @@ import AtprotoAPI, { BskyAgent } from 'npm:@atproto/api';
 const { RichText } = AtprotoAPI;
 
 export default async (agent: BskyAgent, item: FeedEntry) => {
-  const title: string = item.title?.value || '';
-  const description: string = item.description?.value || '';
+  const title: string = (item.title?.value || '').trim();
+  const description: string = (item.description?.value || '').trim();
   const link: string = item.links[0].href || '';
 
   // Bluesky用のテキストを作成
