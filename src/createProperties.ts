@@ -15,17 +15,17 @@ export default async (agent: BskyAgent, item: FeedEntry) => {
   const bskyText = await (async () => {
     const max = 300;
     const { host, pathname } = new URL(link);
-    const ellipsis = `...\n`;
+    const ellipsis = `...`;
     const key = splitter.splitGraphemes(`${host}${pathname}`).slice(0, 19).join('') + ellipsis;
     let text = `${title}\n${key}`;
 
     if (splitter.countGraphemes(text) > max) {
-      const cnt = max - splitter.countGraphemes(`${ellipsis}${key}`);
+      const cnt = max - splitter.countGraphemes(`${ellipsis}\n${key}`);
       const shortenedTitle = splitter
         .splitGraphemes(title)
         .slice(0, cnt)
         .join('');
-      text = `${shortenedTitle}${ellipsis}${key}`;
+      text = `${shortenedTitle}${ellipsis}\n${key}`;
     }
 
     const rt = new RichText({ text });
