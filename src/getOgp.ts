@@ -1,4 +1,4 @@
-import { Document, DOMParser } from 'https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts';
+import { DOMParser } from 'https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts';
 import ogs from 'npm:open-graph-scraper';
 
 export default async (url: string) => {

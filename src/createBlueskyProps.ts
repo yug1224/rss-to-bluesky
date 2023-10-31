@@ -17,15 +17,15 @@ export default async (agent: BskyAgent, item: FeedEntry) => {
     const { host, pathname } = new URL(link);
     const ellipsis = `...`;
     const key = splitter.splitGraphemes(`${host}${pathname}`).slice(0, 19).join('') + ellipsis;
-    let text = `${title}\n${key}`;
+    let text = `${key}\n${title}`;
 
     if (splitter.countGraphemes(text) > max) {
-      const cnt = max - splitter.countGraphemes(`${ellipsis}\n${key}`);
+      const cnt = max - splitter.countGraphemes(`${key}\n${ellipsis}`);
       const shortenedTitle = splitter
         .splitGraphemes(title)
         .slice(0, cnt)
         .join('');
-      text = `${shortenedTitle}${ellipsis}\n${key}`;
+      text = `${key}\n${shortenedTitle}${ellipsis}`;
     }
 
     const rt = new RichText({ text });
@@ -33,8 +33,8 @@ export default async (agent: BskyAgent, item: FeedEntry) => {
     rt.facets = [
       {
         index: {
-          byteStart: rt.unicodeText.length - splitter.countGraphemes(key),
-          byteEnd: rt.unicodeText.length,
+          byteStart: 0,
+          byteEnd: splitter.countGraphemes(key),
         },
         features: [
           {
@@ -48,21 +48,6 @@ export default async (agent: BskyAgent, item: FeedEntry) => {
     return rt;
   })();
 
-  // X用のテキストを作成
-  const xText = (() => {
-    const max = 110;
-    const text = `${title}\n${link}`;
-    const separator = '\n---';
-    if (splitter.countGraphemes(title) <= max) return `${text}${separator}`;
-
-    const ellipsis = '...\n';
-    const cnt = max - splitter.countGraphemes(ellipsis) - splitter.countGraphemes(separator);
-    const shortenedTitle = splitter
-      .splitGraphemes(title)
-      .slice(0, cnt)
-      .join('');
-    return `${shortenedTitle}${ellipsis}${link}${separator}`;
-  })();
-
-  return { bskyText, xText, title, link, description };
+  console.log('success createBlueskyProps');
+  return { bskyText, title, link, description };
 };
