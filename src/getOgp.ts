@@ -18,13 +18,13 @@ export default async (url: string) => {
     let doc = new DOMParser().parseFromString(html, 'text/html');
 
     // 文字コードがutf-8以外の場合はデコードし直す
-    const [_, charset] = (
-      doc?.documentElement
-        ?.querySelector('meta[http-equiv="content-type"]')
-        ?.attributes.getNamedItem('content')?.value || ''
-    )
-      .toLowerCase()
-      .match(/charset=(.*)/) || [, 'utf-8'];
+    const charset =
+      ((doc?.documentElement?.querySelector('meta[http-equiv="content-type"]')?.attributes.getNamedItem('content')
+        ?.value || '').toLowerCase().match(/charset=(.*)/) || '')[1] ||
+      (doc?.documentElement?.querySelector('meta[charset="shift_jis"]')?.attributes.getNamedItem('charset')?.value ||
+        '').toLowerCase() ||
+      'utf-8';
+
     if (charset !== 'utf-8') {
       html = new TextDecoder(charset).decode(arrayBuffer);
       doc = new DOMParser().parseFromString(html, 'text/html');
