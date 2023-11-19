@@ -12,7 +12,7 @@ jobs:
     steps:
       # リポジトリのチェックアウト
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       # Cacheの復元
       - name: Cache Deno Deps
         uses: actions/cache@v3
@@ -28,20 +28,40 @@ jobs:
             .timestamp
           key: last-execution-time
           restore-keys: last-execution-time-
-      - name: Check file exists
-        id: check_file
+      - name: Restore itemlist Cache
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            .itemList.json
+          key: item-list
+          restore-keys: item-list-
+      - name: Check timestamp file exists
+        id: check_timestamp
         uses: andstor/file-existence-action@v2
         with:
           files: .timestamp
-      # 現在時刻を設定
+      - name: Check itemlist file exists
+        id: check_itemlist
+        uses: andstor/file-existence-action@v2
+        with:
+          files: .itemList.json
+      # 環境変数を設定
       - name: Set Current Time
-        if: steps.check_file.outputs.files_exists == 'false'
+        if: steps.check_timestamp.outputs.files_exists == 'false'
         run: |
           echo "$(date '+%Y-%m-%dT%H:%M:%SZ')" > .timestamp
       - name: Set Timestamp Hash
         id: set-timestamp-hash
         run: |
           echo "TIMESTAMP=${{hashFiles('.timestamp')}}" >> $GITHUB_OUTPUT
+      - name: Set Current itemlist
+        if: steps.check_itemlist.outputs.files_exists == 'false'
+        run: |
+          echo "[]" > .itemList.json
+      - name: Set itemlist Hash
+        id: set-itemlist-hash
+        run: |
+          echo "ITEMLIST=${{hashFiles('.itemList.json')}}" >> $GITHUB_OUTPUT
       # Denoのセットアップ
       - name: Setup Deno
         uses: denoland/setup-deno@v1
@@ -58,8 +78,15 @@ jobs:
       # Cacheの保存
       - name: Save Last Execution Time Cache
         uses: actions/cache/save@v3
-        if: ${{always() && (steps.check_file.outputs.files_exists == 'false' || steps.set-timestamp-hash.outputs.TIMESTAMP != hashFiles('.timestamp'))}}
+        if: ${{always() && (steps.check_timestamp.outputs.files_exists == 'false' || steps.set-timestamp-hash.outputs.TIMESTAMP != hashFiles('.timestamp'))}}
         with:
           path: |
             .timestamp
           key: last-execution-time-${{hashFiles('.timestamp')}}
+      - name: Save itemlist Cache
+        uses: actions/cache/save@v3
+        if: ${{always() && (steps.check_itemlist.outputs.files_exists == 'false' || steps.set-itemlist-hash.outputs.ITEMLIST != hashFiles('.itemList.json'))}}
+        with:
+          path: |
+            .itemList.json
+          key: item-list-${{hashFiles('.itemList.json')}}

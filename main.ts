@@ -34,17 +34,27 @@ try {
     isTimeout = true;
   }, 1000 * 60 * 10);
 
+  let cnt = 0;
   // 取得した記事リストをループ処理
   for await (const item of itemList) {
     // isTimeoutがtrueだったら終了
     if (isTimeout) {
       console.log('timeout');
-      Deno.exit(0);
+      break;
+    }
+
+    // 投稿回数をカウントし、3件以上投稿したら終了
+    cnt++;
+    if (cnt > 3) {
+      console.log('post count over');
+      break;
     }
 
     // 最終実行時間を更新
     const timestamp = item.published ? new Date(item.published).toISOString() : new Date().toISOString();
     await Deno.writeTextFile('.timestamp', timestamp);
+    // 記事リストを更新
+    await Deno.writeTextFile('.itemList.json', JSON.stringify(itemList.slice(cnt)));
 
     // URLからOGPの取得
     const og = await getOgp(item.links[0].href || '');
