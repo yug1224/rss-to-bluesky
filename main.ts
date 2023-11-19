@@ -20,6 +20,13 @@ try {
     Deno.exit(0);
   }
 
+  // UTC:15時以降は終了（JST:9-24時の間のみ実行）
+  const nowHour = new Date().getUTCHours();
+  if (nowHour >= 15) {
+    console.log('now hour is over 15');
+    Deno.exit(0);
+  }
+
   // Blueskyにログイン
   const { BskyAgent } = AtprotoAPI;
   const service = 'https://bsky.social';
