@@ -32,7 +32,6 @@ export default async () => {
     lastItemList ? JSON.parse(lastItemList) : [],
     fetchedItemList,
   ));
-  console.log(JSON.stringify(itemList));
   await Deno.writeTextFile('.itemList.json', JSON.stringify(itemList));
 
   return itemList;
