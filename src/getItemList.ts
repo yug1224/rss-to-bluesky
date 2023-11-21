@@ -23,7 +23,7 @@ export default async () => {
   const fetchedItemList = feed.entries.reverse().filter((item: FeedEntry) => {
     return (
       item.published &&
-      new Date(lastExecutionTime.trim()) < new Date(item.published)
+      new Date(Number(lastExecutionTime.trim())) < new Date(item.published)
     );
   });
 
@@ -31,7 +31,11 @@ export default async () => {
   const itemList = Object.values(deepMerge(
     lastItemList ? JSON.parse(lastItemList) : [],
     fetchedItemList,
+    {
+      arrays: 'replace',
+    },
   ));
+
   await Deno.writeTextFile('.itemList.json', JSON.stringify(itemList));
 
   return itemList;

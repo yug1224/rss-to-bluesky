@@ -58,8 +58,8 @@ try {
     }
 
     // 最終実行時間を更新
-    const timestamp = item.published ? new Date(item.published).toISOString() : new Date().toISOString();
-    await Deno.writeTextFile('.timestamp', timestamp);
+    const timestamp = item.published ? new Date(item.published).getTime() : new Date().getTime();
+    await Deno.writeTextFile('.timestamp', timestamp.toString());
     // 記事リストを更新
     await Deno.writeTextFile('.itemList.json', JSON.stringify(itemList.slice(cnt)));
 

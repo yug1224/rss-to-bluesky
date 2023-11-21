@@ -13,6 +13,11 @@ jobs:
       # リポジトリのチェックアウト
       - name: Checkout
         uses: actions/checkout@v4
+      # Denoのセットアップ
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
       # Cacheの復元
       - name: Cache Deno Deps
         uses: actions/cache@v3
@@ -49,24 +54,11 @@ jobs:
       - name: Set Current Time
         if: steps.check_timestamp.outputs.files_exists == 'false'
         run: |
-          echo "$(date '+%Y-%m-%dT%H:%M:%SZ')" > .timestamp
-      - name: Set Timestamp Hash
-        id: set-timestamp-hash
-        run: |
-          echo "TIMESTAMP=${{hashFiles('.timestamp')}}" >> $GITHUB_OUTPUT
+          echo "$(deno eval 'console.log(new Date().getTime())')" > .timestamp
       - name: Set Current itemlist
         if: steps.check_itemlist.outputs.files_exists == 'false'
         run: |
           echo "[]" > .itemList.json
-      - name: Set itemlist Hash
-        id: set-itemlist-hash
-        run: |
-          echo "ITEMLIST=${{hashFiles('.itemList.json')}}" >> $GITHUB_OUTPUT
-      # Denoのセットアップ
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
       # Denoの実行
       - name: Deno Run
         run: deno run --allow-read --allow-write --allow-env --allow-net main.ts
@@ -78,15 +70,15 @@ jobs:
       # Cacheの保存
       - name: Save Last Execution Time Cache
         uses: actions/cache/save@v3
-        if: ${{always() && (steps.check_timestamp.outputs.files_exists == 'false' || steps.set-timestamp-hash.outputs.TIMESTAMP != hashFiles('.timestamp'))}}
+        if: ${{always()}}
         with:
           path: |
             .timestamp
-          key: last-execution-time-${{hashFiles('.timestamp')}}
+          key: last-execution-time-${{github.run_id}}
       - name: Save itemlist Cache
         uses: actions/cache/save@v3
-        if: ${{always() && (steps.check_itemlist.outputs.files_exists == 'false' || steps.set-itemlist-hash.outputs.ITEMLIST != hashFiles('.itemList.json'))}}
+        if: ${{always()}}
         with:
           path: |
             .itemList.json
-          key: item-list-${{hashFiles('.itemList.json')}}
+          key: item-list-${{github.run_id}}
