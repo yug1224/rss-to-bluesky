@@ -39,7 +39,7 @@ export default async ({
         const c = new AbortController();
         // 10秒でタイムアウト
         setTimeout(() => {
-          console.log('timeout');
+          console.log('timeout to upload image');
           return c.abort();
         }, 1000 * 10 * (retryCount + 1));
 
