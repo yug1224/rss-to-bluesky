@@ -33,6 +33,8 @@ export default async () => {
     fetchedItemList,
     {
       arrays: 'replace',
+      maps: 'replace',
+      sets: 'replace',
     },
   ));
 
