@@ -1,6 +1,5 @@
 import { FeedEntry } from 'https://deno.land/x/rss@0.6.0/src/types/mod.ts';
 import { parseFeed } from 'https://deno.land/x/rss@0.6.0/mod.ts';
-import { deepMerge } from 'https://deno.land/std@0.207.0/collections/mod.ts';
 
 const lastExecutionTime = await Deno.readTextFile('.timestamp');
 console.log(lastExecutionTime.trim());
@@ -18,27 +17,20 @@ export default async () => {
 
   // 前回残した記事リストを取得
   const lastItemList = await Deno.readTextFile('.itemList.json');
+  const itemList = lastItemList ? JSON.parse(lastItemList) : [];
 
   // 最終実行時間以降かつdescriptionがある記事を抽出
-  const fetchedItemList = feed.entries.reverse().filter((item: FeedEntry) => {
-    return (
+  // 前回残した記事リストと今回取得した記事リストをマージ
+  feed.entries.reverse().map((item: FeedEntry) => {
+    if (
       item.published &&
-      new Date(Number(lastExecutionTime.trim())) < new Date(item.published)
-    );
+      new Date(Number(lastExecutionTime.trim())) < new Date(item.published) &&
+      itemList.findIndex((i: FeedEntry) => i.id === item.id) === -1
+    ) {
+      itemList.push(item);
+    }
   });
 
-  // 前回残した記事リストと今回取得した記事リストをマージ
-  const itemList = Object.values(deepMerge(
-    lastItemList ? JSON.parse(lastItemList) : [],
-    fetchedItemList,
-    {
-      arrays: 'replace',
-      maps: 'replace',
-      sets: 'replace',
-    },
-  ));
-
   await Deno.writeTextFile('.itemList.json', JSON.stringify(itemList));
-
   return itemList;
 };
