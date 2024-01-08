@@ -12,9 +12,10 @@ import resizeImage from './src/resizeImage.ts';
 try {
   // rss feedから記事リストを取得
   const itemList = await getItemList();
-  console.log(JSON.stringify(itemList, null, 2));
 
   // 対象がなかったら終了
+  console.log('itemList.length', itemList.length);
+  console.log('itemList', JSON.stringify(itemList, null, 2));
   if (!itemList.length) {
     console.log('not found feed item');
     Deno.exit(0);

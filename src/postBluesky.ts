@@ -62,7 +62,7 @@ export default async ({
           size: uploadedImage.data.blob.size,
         };
       } catch (e) {
-        console.log(JSON.stringify(e, null, 2));
+        console.log('e', JSON.stringify(e, null, 2));
         // 3回リトライしてもダメならundefinedを返す
         if (retryCount >= 3) {
           console.log('failed to upload image');
@@ -95,7 +95,7 @@ export default async ({
       langs: ['ja'],
     };
 
-  console.log(JSON.stringify(postObj, null, 2));
+  console.log('postObj', JSON.stringify(postObj, null, 2));
   await agent.post(postObj);
   console.log('post to Bluesky');
 };

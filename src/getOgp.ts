@@ -31,7 +31,7 @@ export default async (url: string) => {
     }
 
     const { result } = await ogs({ html });
-    console.log(JSON.stringify(result, null, 2));
+    console.log('result', JSON.stringify(result, null, 2));
     console.log('success to get ogp');
     return result;
   } catch (e) {
