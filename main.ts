@@ -21,9 +21,9 @@ try {
     Deno.exit(0);
   }
 
-  // UTC:15時以降は終了（JST:9-24時の間のみ実行）
+  // UTC:15-22時の間は終了（JST:7-24時の間のみ実行）
   const nowHour = new Date().getUTCHours();
-  if (nowHour >= 15) {
+  if (nowHour >= 15 && nowHour < 22) {
     console.log('now hour is over 15');
     Deno.exit(0);
   }
@@ -38,9 +38,12 @@ try {
 
   // 10分後に処理を終了させるためにフラグを立てる
   let isTimeout = false;
-  setTimeout(() => {
-    isTimeout = true;
-  }, 1000 * 60 * 10);
+  setTimeout(
+    () => {
+      isTimeout = true;
+    },
+    1000 * 60 * 10,
+  );
 
   let cnt = 0;
   // 取得した記事リストをループ処理
@@ -62,7 +65,10 @@ try {
     const timestamp = item.published ? new Date(item.published).getTime() : new Date().getTime();
     await Deno.writeTextFile('.timestamp', timestamp.toString());
     // 記事リストを更新
-    await Deno.writeTextFile('.itemList.json', JSON.stringify(itemList.slice(cnt)));
+    await Deno.writeTextFile(
+      '.itemList.json',
+      JSON.stringify(itemList.slice(cnt)),
+    );
 
     // URLからOGPの取得
     const og = await getOgp(item.links[0].href || '');
@@ -75,7 +81,10 @@ try {
         value: og.ogDescription || item.description?.value || '',
       },
     };
-    const { bskyText, title, link, description } = await createBlueskyProps(agent, tmpItem);
+    const { bskyText, title, link, description } = await createBlueskyProps(
+      agent,
+      tmpItem,
+    );
     const { xText } = await createXProps(tmpItem);
 
     // 画像のリサイズ
