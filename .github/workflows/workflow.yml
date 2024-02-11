@@ -1,11 +1,11 @@
-name: Technews to SNS
+name: RSS to Bluesky
 on:
   schedule:
     # 15分ごとに実行
     - cron: '*/15 * * * *'
   workflow_dispatch:
 jobs:
-  technews-to-sns:
+  rss-to-bluesky:
     runs-on: macos-latest
     # 15分以上かかったらタイムアウト
     timeout-minutes: 15
@@ -66,7 +66,6 @@ jobs:
           BLUESKY_IDENTIFIER: ${{secrets.BLUESKY_IDENTIFIER}}
           BLUESKY_PASSWORD: ${{secrets.BLUESKY_PASSWORD}}
           RSS_URL: ${{secrets.RSS_URL}}
-          WEBHOOK_URL: ${{secrets.WEBHOOK_URL}}
       # Cacheの保存
       - name: Save Last Execution Time Cache
         uses: actions/cache/save@v3

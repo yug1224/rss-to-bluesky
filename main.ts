@@ -1,13 +1,11 @@
 import 'https://deno.land/std@0.193.0/dotenv/load.ts';
 import { delay } from 'https://deno.land/std@0.201.0/async/mod.ts';
 import AtprotoAPI from 'npm:@atproto/api';
-import createBlueskyProps from './src/createBlueskyProps.ts';
-import createXProps from './src/createXProps.ts';
-import getItemList from './src/getItemList.ts';
-import getOgp from './src/getOgp.ts';
-import postBluesky from './src/postBluesky.ts';
-import postWebhook from './src/postWebhook.ts';
-import resizeImage from './src/resizeImage.ts';
+import createBlueskyProps from './lib/createBlueskyProps.ts';
+import getItemList from './lib/getItemList.ts';
+import getOgp from './lib/getOgp.ts';
+import postBluesky from './lib/postBluesky.ts';
+import resizeImage from './lib/resizeImage.ts';
 
 try {
   // rss feedから記事リストを取得
@@ -85,7 +83,6 @@ try {
       agent,
       tmpItem,
     );
-    const { xText } = await createXProps(tmpItem);
 
     // 画像のリサイズ
     const { mimeType, resizedImage } = await (async () => {
@@ -107,9 +104,6 @@ try {
       mimeType,
       image: resizedImage,
     });
-
-    // IFTTTを使ってXに投稿
-    await postWebhook(xText);
 
     // 15秒待つ
     console.log('wait 15 seconds');
